@@ -9,6 +9,11 @@ import ValueViewer from './ValueViewer'
 import { TAB_KEY, ENTER_KEY, DELETE_KEY, ESCAPE_KEY, BACKSPACE_KEY,
   LEFT_KEY, UP_KEY, DOWN_KEY, RIGHT_KEY } from './keys'
 
+// Certain key bindings needed to be disabled in order to accomodate mobile-friendly behaviour in forms-renderer
+// These constants were added for clarity (rather than simply removing existing code)
+const NAV_KEYS_ENABLED = false
+const DELETE_KEYS_ENABLED = false
+
 const isEmpty = (obj) => Object.keys(obj).length === 0
 
 const range = (start, end) => {
@@ -252,18 +257,21 @@ export default class DataSheet extends PureComponent {
       return
     }
 
-    if (keyCode === TAB_KEY) {
-      this.handleNavigate(e, {i: 0, j: e.shiftKey ? -1 : 1}, true)
-    } else if (keyCode === RIGHT_KEY) {
-      this.handleNavigate(e, {i: 0, j: 1})
-    } else if (keyCode === LEFT_KEY) {
-      this.handleNavigate(e, {i: 0, j: -1})
-    } else if (keyCode === UP_KEY) {
-      this.handleNavigate(e, {i: -1, j: 0})
-    } else if (keyCode === DOWN_KEY) {
-      this.handleNavigate(e, {i: 1, j: 0})
-    } else if (commit && keyCode === ENTER_KEY) {
-      this.handleNavigate(e, {i: e.shiftKey ? -1 : 1, j: 0})
+    // This code will NOT run. This is what we want for the renderer.
+    if (NAV_KEYS_ENABLED) {
+      if (keyCode === TAB_KEY) {
+        this.handleNavigate(e, {i: 0, j: e.shiftKey ? -1 : 1}, true)
+      } else if (keyCode === RIGHT_KEY) {
+        this.handleNavigate(e, {i: 0, j: 1})
+      } else if (keyCode === LEFT_KEY) {
+        this.handleNavigate(e, {i: 0, j: -1})
+      } else if (keyCode === UP_KEY) {
+        this.handleNavigate(e, {i: -1, j: 0})
+      } else if (keyCode === DOWN_KEY) {
+        this.handleNavigate(e, {i: 1, j: 0})
+      } else if (commit && keyCode === ENTER_KEY) {
+        this.handleNavigate(e, {i: e.shiftKey ? -1 : 1, j: 0})
+      }
     }
   }
 
@@ -300,22 +308,25 @@ export default class DataSheet extends PureComponent {
       return true
     }
 
-    if (!isEditing) {
-      this.handleKeyboardCellMovement(e)
-      if (deleteKeysPressed) {
-        e.preventDefault()
-        this.clearSelectedCells(start, end)
-      } else if (currentCell && !currentCell.readOnly) {
-        if (enterKeyPressed) {
-          this._setState({editing: start, clear: {}, forceEdit: true})
+    // This code will not run. That is what we want for the renderer.
+    if (DELETE_KEYS_ENABLED) {
+      if (!isEditing) {
+        this.handleKeyboardCellMovement(e)
+        if (deleteKeysPressed) {
           e.preventDefault()
-        } else if (numbersPressed ||
-          numPadKeysPressed ||
-          lettersPressed ||
-          latin1Supplement ||
-          equationKeysPressed) {
-          // empty out cell if user starts typing without pressing enter
-          this._setState({editing: start, clear: start, forceEdit: false})
+          this.clearSelectedCells(start, end)
+        } else if (currentCell && !currentCell.readOnly) {
+          if (enterKeyPressed) {
+            this._setState({editing: start, clear: {}, forceEdit: true})
+            e.preventDefault()
+          } else if (numbersPressed ||
+            numPadKeysPressed ||
+            lettersPressed ||
+            latin1Supplement ||
+            equationKeysPressed) {
+            // empty out cell if user starts typing without pressing enter
+            this._setState({editing: start, clear: start, forceEdit: false})
+          }
         }
       }
     }
