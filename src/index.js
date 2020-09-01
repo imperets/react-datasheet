@@ -6,6 +6,8 @@ import DataEditor from './DataEditor'
 import ValueViewer from './ValueViewer'
 import { renderValue, renderData } from './renderHelpers'
 
+// This branch is based on version 1.4.1
+
 export default DataSheet
 
 export {
